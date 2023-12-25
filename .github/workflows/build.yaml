@@ -18,7 +18,8 @@ jobs:
         sudo apt-get update
         sudo apt-get upgrade -y
         sudo apt-get install build-essential subversion git-core libncurses5-dev zlib1g-dev gawk flex quilt libssl-dev xsltproc libxml-parser-perl \
-          mercurial bzr ecj cvs unzip lib32z1 lib32z1-dev lib32stdc++6 libstdc++6 libmpc-dev libgmp-dev tree liblua5.1-dev gcc-arm-none-eabi gcc-arm-linux-gnueabi -y
+          mercurial bzr ecj cvs unzip lib32z1 lib32z1-dev lib32stdc++6 libstdc++6 libmpc-dev libgmp-dev tree liblua5.1-dev gcc-arm-none-eabi \
+          gcc-arm-linux-gnueabi python3 -y
 
     - name: Clone Repositories
       run: |
@@ -40,6 +41,7 @@ jobs:
         cd ../../mpy-cross
         make
         cd ../ports/rp2
+        make BOARD=RPI_PICO submodules
         make USER_C_MODULES=../../ulab/code/micropython.cmake
           
     - name: Upload result as release
