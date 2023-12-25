@@ -1,0 +1,53 @@
+name: Build Releases
+
+on:
+  workflow_dispatch:
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install requirements
+      run: |
+        sudo apt-get update
+        sudo apt-get upgrade -y
+        sudo apt-get install build-essential subversion git-core libncurses5-dev zlib1g-dev gawk flex quilt libssl-dev xsltproc libxml-parser-perl \
+          mercurial bzr ecj cvs unzip lib32z1 lib32z1-dev lib32stdc++6 libstdc++6 libmpc-dev libgmp-dev tree liblua5.1-dev gcc-arm-none-eabi gcc-arm-linux-gnueabi -y
+
+    - name: Clone Repositories
+      run: |
+        git clone https://github.com/v923z/micropython-ulab.git ulab
+        git clone https://github.com/micropython/micropython.git
+      
+    - name: Update submodules
+      run: |
+        cd micropython
+        git submodule update --init --recursive
+        
+    - name: Compile for RP2
+      run: |
+        # cd micropython
+        git submodule update --init lib/tinyusb
+        git submodule update --init lib/pico-sdk
+        cd lib/pico-sdk
+        git submodule update --init lib/tinyusb
+        cd ../../mpy-cross
+        make
+        cd ../ports/rp2
+        make USER_C_MODULES=../../ulab/code/micropython.cmake
+          
+    - name: Upload result as release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "build/*"
+#        body: ""
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: "RP2-Micropython"
+        name: "RP2-Micropython"
+  
