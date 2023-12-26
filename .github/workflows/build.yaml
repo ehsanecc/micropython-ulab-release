@@ -21,33 +21,19 @@ jobs:
           mercurial bzr ecj cvs unzip lib32z1 lib32z1-dev lib32stdc++6 libstdc++6 libmpc-dev libgmp-dev tree liblua5.1-dev gcc-arm-none-eabi \
           gcc-arm-linux-gnueabi python3 -y
 
-    - name: Clone Repositories
-      run: |
-        git clone https://github.com/v923z/micropython-ulab.git ulab
-        git clone https://github.com/micropython/micropython.git
-      
-    - name: Update submodules
-      run: |
-        cd micropython
-        git submodule update --init --recursive
+    - name: Clone Repository
+      run: git clone https://github.com/v923z/micropython-ulab.git ulab
         
-    - name: Compile for RP2
+    - name: Build for RP2
       run: |
-        # cd micropython
-        git submodule update --init lib/tinyusb
-        git submodule update --init lib/pico-sdk
-        cd lib/pico-sdk
-        git submodule update --init lib/tinyusb
-        cd ../../mpy-cross
-        make
-        cd ../ports/rp2
-        make BOARD=RPI_PICO submodules
-        make USER_C_MODULES=../../ulab/code/micropython.cmake
+        cd ulab/build
+        chmod +x rp2.sh
+        ./rp2.sh
           
     - name: Upload result as release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "build-RPI_PICO/*"
+        artifacts: "micropython/ports/rp2/build-RPI_PICO/firmware.*"
 #        body: ""
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: "RP2-Micropython"
